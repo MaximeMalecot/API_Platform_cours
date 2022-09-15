@@ -26,6 +26,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     ]
 )]
 #[Post(
+    security: "is_granted('ROLE_DIRECTOR')",
     denormalizationContext: [
         'groups' => ['pizza_post', 'pizza_write']
     ],
