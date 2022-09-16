@@ -3,13 +3,18 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CustomerRepository;
 use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints\Type;
+use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ApiResource]
 #[Get(
@@ -26,6 +31,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ]
     ]
 )]
+#[Post(
+    security: "is_granted('ROLE_DIRECTOR')",
+    denormalizationContext: [
+        'groups' => ['customer_write']
+    ],
+    normalizationContext: [
+        'groups' => ['customer_get']
+    ]
+)]
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer
 {
@@ -35,19 +49,31 @@ class Customer
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["customer_get", "customer_cget", "order_get"])]
+    #[Groups(["customer_get", "customer_cget", "customer_write", "order_get"])]
+    #[NotNull()]
+    #[NotBlank()]
+    #[Type('string')]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["customer_get", "customer_cget", "order_get"])]
+    #[Groups(["customer_get", "customer_cget", "customer_write", "order_get"])]
+    #[NotNull()]
+    #[NotBlank()]
+    #[Type('string')]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["customer_get"])]
+    #[Groups(["customer_get", "customer_write"])]
+    #[NotNull()]
+    #[NotBlank()]
+    #[Regex("/^((\+)33|0|0033)[1-9](\d{2}){4}$/i", message: "Wrong format")]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["customer_get"])]
+    #[Groups(["customer_get", "customer_write"])]
+    #[NotNull()]
+    #[NotBlank()]
+    #[Type('string')]
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Order::class, orphanRemoval: true)]

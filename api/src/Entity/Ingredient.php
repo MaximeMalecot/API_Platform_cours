@@ -7,10 +7,15 @@ use ApiPlatform\Metadata\Get;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\IngredientRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Type;
 
 #[ApiResource(
     normalizationContext: [
@@ -19,7 +24,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
 )]
 #[Get]
 #[GetCollection]
+#[Post(
+    security: "is_granted('ROLE_DIRECTOR')",
+    denormalizationContext: [
+        'groups' => ['ingredient_write']
+    ],
+    normalizationContext: [
+        'groups' => ['ingredient_read']
+    ]
+)]
 #[ORM\Entity(repositoryClass: IngredientRepository::class)]
+#[UniqueEntity('name', message: "Already taken")]
 class Ingredient
 {
     #[ORM\Id]
@@ -28,7 +43,11 @@ class Ingredient
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["pizza_get","ingredient_read"])]
+
+    #[Groups(["pizza_get","ingredient_read", "ingredient_write"])]
+    #[NotNull()]
+    #[NotBlank()]
+    #[Type('string')]
     private ?string $name = null;
 
     #[ORM\ManyToMany(targetEntity: Pizza::class, inversedBy: 'ingredients')]
