@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Ingredient;
 use App\Entity\Pizza;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -16,6 +17,7 @@ class PizzaFixtures extends Fixture implements DependentFixtureInterface
         $faker = Factory::create();
 
         $ingredients = $manager->getRepository(Ingredient::class)->findAll();
+      
 
         for($i=0;$i<10;$i++){
             $object=(new Pizza())
@@ -38,6 +40,7 @@ class PizzaFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             IngredientFixtures::class,
+            UserFixtures::class
         ];
     }
 }
