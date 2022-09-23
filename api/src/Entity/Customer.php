@@ -66,7 +66,7 @@ class Customer
     #[Groups(["customer_get", "customer_write"])]
     #[NotNull()]
     #[NotBlank()]
-    #[Regex("/^((\+)33|0|0033)[1-9](\d{2}){4}$/i", message: "Wrong format")]
+    // #[Regex("/^((\+)33|0|0033)[1-9](\d{2}){4}$/i", message: "Wrong format")]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]
