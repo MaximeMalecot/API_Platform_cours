@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\OrderRepository;
@@ -27,6 +28,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ]
     ]
 )]
+#[Post]
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
 class Order
@@ -48,6 +50,10 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["order_get"])]
     private ?Customer $customer = null;
+
+    #[ORM\Column(nullable: false, options:["default" => 0])]
+    #[Groups(["order_get", "order_cget", "customer_get"])]
+    private ?int $total = 0;
 
     public function __construct()
     {
@@ -109,6 +115,18 @@ class Order
     public function setCustomer(?Customer $customer): self
     {
         $this->customer = $customer;
+
+        return $this;
+    }
+
+    public function getTotal(): ?int
+    {
+        return $this->total;
+    }
+
+    public function setTotal(?int $total): self
+    {
+        $this->total = $total;
 
         return $this;
     }

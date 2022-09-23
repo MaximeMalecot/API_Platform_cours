@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DetailRepository;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource]
@@ -24,6 +25,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ]
     ]
 )]
+#[Post()]
 #[ORM\Entity(repositoryClass: DetailRepository::class)]
 class Detail
 {
