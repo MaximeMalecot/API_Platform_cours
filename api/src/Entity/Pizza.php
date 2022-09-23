@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PizzaRepository;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -48,6 +49,9 @@ use Symfony\Component\Validator\Constraints\Unique;
     normalizationContext: [
         'groups' => ['pizza_get'] 
     ]
+)]
+#[Delete(
+    security: "is_granted('DIRECTOR_OLD', user)"
 )]
 #[ORM\Entity(repositoryClass: PizzaRepository::class)]
 #[UniqueEntity('name', message: 'Nom déjà utilisé')]
