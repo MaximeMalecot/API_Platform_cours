@@ -1,10 +1,8 @@
 <?php
-// api/src/EventSubscriber/BookMailSubscriber.php
 
 namespace App\EventSubscriber;
 
 use App\Entity\Detail;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
