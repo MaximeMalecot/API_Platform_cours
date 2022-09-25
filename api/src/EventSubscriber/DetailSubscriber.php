@@ -14,12 +14,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 final class DetailSubscriber implements EventSubscriberInterface
 {
 
-    private $entityManager;
-
-    public function __construct( EntityManagerInterface $entityManager ) {
-        $this->entityManager = $entityManager;
-    }
-
     public static function getSubscribedEvents()
     {
         return [
