@@ -2,21 +2,58 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\Pizza;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
 use Doctrine\DBAL\Types\Types;
+use ApiPlatform\Metadata\Patch;
 use Doctrine\ORM\Mapping as ORM;
+use App\Dto\UserResetPasswordDto;
+use App\Repository\UserRepository;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use App\State\UserResetPasswordProcessor;
+use App\Controller\ResetPasswordController;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Regex;
 
 #[ApiResource]
+#[Get(
+    normalizationContext: [
+        'groups' => ['user_get']
+    ]
+)]
+#[GetCollection(
+    normalizationContext: [
+        'groups' => ['user_cget']
+    ]
+)]
+#[Patch(
+        name: 'resetPwd', 
+        uriTemplate: '/users/resetPwd', 
+        controller: ResetPasswordController::class,
+        denormalizationContext: [
+            'groups' => ['user_resetPwd_request']
+        ],
+        normalizationContext: [
+            'groups' => ['user_resetPwd']
+        ]
+    )
+]
+#[Patch(
+    name: 'resetPwd', 
+    uriTemplate: '/users/updatePwd', 
+    input: UserResetPasswordDto::class,
+    processor: UserResetPasswordProcessor::class
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[UniqueEntity('email', message: 'Email déjà utilisé')]
@@ -31,6 +68,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[NotBlank()]
     #[NotNull()]
     #[Email()]
+    #[Groups(["user_cget", "user_get", "user_resetPwd", "user_resetPwd_request"])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -40,16 +78,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[NotNull()]
-    #[NotBlank()]
+    #[Groups(["user_get"])]
     // #[Regex("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/i", message: "Must be minimum eight characters, at least one letter and one number ")]
     private ?string $password = null;
+
+    #[Groups(["user_changePwd"])]
+    private ?string $plainPassword = null;
+
+    private ?string $oldPassword = null;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Pizza::class)]
     private Collection $pizzas;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["user_resetPwd", "user_changePwd"])]
+    private ?string $resetPwdToken = null;
 
     public function __construct()
     {
@@ -164,6 +210,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    public function getOldPassword(): ?string
+    {
+        return $this->oldPassword;
+    }
+
+    public function setOldPassword(?string $oldPassword): self
+    {
+        $this->oldPassword = $oldPassword;
+
+        return $this;
+    }
+
+    public function getResetPwdToken(): ?string
+    {
+        return $this->resetPwdToken;
+    }
+
+    public function setResetPwdToken(?string $resetPwdToken): self
+    {
+        $this->resetPwdToken = $resetPwdToken;
 
         return $this;
     }

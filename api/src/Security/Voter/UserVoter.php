@@ -2,22 +2,25 @@
 
 namespace App\Security\Voter;
 
+use DateInterval;
 use App\Entity\User;
 use DateTimeImmutable;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
-use DateInterval;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class UserVoter extends Voter
 {
     public const DIRECTOR_NEW = 'DIRECTOR_NEW';
     public const DIRECTOR_OLD = 'DIRECTOR_OLD';
+    public const CHANGE_PWD = 'CHANGE_PWD';
+
+    public function __construct(private RequestStack $requestStack, private EntityManagerInterface $em){}
 
     protected function supports(string $attribute, $subject): bool
     {
-        // replace with your own logic
-        // https://symfony.com/doc/current/security/voters.html
         return in_array($attribute, [self::DIRECTOR_OLD, self::DIRECTOR_NEW])
             && $subject instanceof \App\Entity\User;
     }
@@ -26,6 +29,7 @@ class UserVoter extends Voter
     {
         $user = $token->getUser();
         // if the user is anonymous, do not grant access
+
         if (!$user instanceof UserInterface) {
             return false;
         }
