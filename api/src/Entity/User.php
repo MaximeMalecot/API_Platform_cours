@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Pizza;
+use Gedmo\Mapping\Annotation as Gedmo;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use Doctrine\DBAL\Types\Types;
@@ -37,8 +38,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     ]
 )]
 #[Patch(
-        name: 'resetPwd', 
-        uriTemplate: '/users/resetPwd', 
+        name: 'forgot_password', 
+        uriTemplate: '/users/forgot-password', 
         controller: ResetPasswordController::class,
         denormalizationContext: [
             'groups' => ['user_resetPwd_request']
@@ -102,6 +103,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $pizzas;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Gedmo\Timestampable(on: 'create')]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
