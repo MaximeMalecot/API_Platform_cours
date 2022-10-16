@@ -52,7 +52,18 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     name: 'resetPwd', 
     uriTemplate: '/users/updatePwd', 
     input: UserResetPasswordDto::class,
+    output: User::class,
     processor: UserResetPasswordProcessor::class
+)]
+#[Post(
+    name: 'register', 
+    uriTemplate: '/users/register',
+    denormalizationContext: [
+        'groups' => ['user_register']
+    ],
+    normalizationContext: [
+        'groups' => ['user_cget']
+    ]
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -68,7 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[NotBlank()]
     #[NotNull()]
     #[Email()]
-    #[Groups(["user_cget", "user_get", "user_resetPwd", "user_resetPwd_request"])]
+    #[Groups(["user_cget", "user_get", "user_register", "user_resetPwd", "user_resetPwd_request"])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -82,7 +93,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // #[Regex("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/i", message: "Must be minimum eight characters, at least one letter and one number ")]
     private ?string $password = null;
 
-    #[Groups(["user_changePwd"])]
+    #[Groups(["user_changePwd", "user_register"])]
     private ?string $plainPassword = null;
 
     private ?string $oldPassword = null;
